@@ -111,24 +111,50 @@ function checkCatalogOpentui(target: string): Check | null {
   }
 }
 
+// The android native .so, pinned in the build tree's root package.json.
+//
+// Declared under UPSTREAM's name, aliased to the fork's package:
+//
+//   "@opentui/core-android-arm64":
+//       "npm:@xincli/opentui-core-android-arm64@<version>"
+//
+// That is the name packages/core/src/platform/android-native.ts imports
+// as a string literal, and the literal is what makes `bun build --compile`
+// embed libopentui.so into the binary. A computed specifier embeds
+// nothing and the binary dies on launch with "OpenTUI native library for
+// Android is missing" — which is what shipped as 0.5.1-bun.1.
+//
+// The `overrides` entry keys on the alias too, so a transitive resolution
+// from core can never pull a different native version than this one.
 function checkAndroidNative(target: string): Check | null {
   const file = path.join(target, "package.json")
   if (!existsSync(file)) return null
   const snap = readJson(file)
-  const want = versions.opentui.androidArm64Native
-  const curOverride = snap.overrides?.["@xincli/opentui-core-android-arm64"]
-  const curOptional = snap.optionalDependencies?.["@xincli/opentui-core-android-arm64"]
-  const drifted = curOverride !== want || curOptional !== want
+  const version = versions.opentui.androidArm64Native
+  const key = "@opentui/core-android-arm64"
+  const want = `npm:@xincli/opentui-core-android-arm64@${version}`
+  const curOverride = snap.overrides?.[key]
+  const curOptional = snap.optionalDependencies?.[key]
+  // A literal @xincli key left over from before the alias switch would
+  // still install, so it has to be reported as drift rather than ignored.
+  const stale =
+    snap.overrides?.["@xincli/opentui-core-android-arm64"] !== undefined ||
+    snap.optionalDependencies?.["@xincli/opentui-core-android-arm64"] !== undefined
+  const drifted = curOverride !== want || curOptional !== want || stale
   return {
     name: "root android-arm64 native pin",
     ok: !drifted,
-    msg: drifted ? `override=${curOverride} optional=${curOptional} → ${want}` : `@${want}`,
+    msg: drifted
+      ? `override=${curOverride} optional=${curOptional}${stale ? " (stale @xincli key)" : ""} → ${want}`
+      : `@${version} (aliased)`,
     fix: () => {
       const pkg = readJson(file)
       pkg.overrides ??= {}
       pkg.optionalDependencies ??= {}
-      pkg.overrides["@xincli/opentui-core-android-arm64"] = want
-      pkg.optionalDependencies["@xincli/opentui-core-android-arm64"] = want
+      delete pkg.overrides["@xincli/opentui-core-android-arm64"]
+      delete pkg.optionalDependencies["@xincli/opentui-core-android-arm64"]
+      pkg.overrides[key] = want
+      pkg.optionalDependencies[key] = want
       writeJson(file, pkg)
     },
   }
