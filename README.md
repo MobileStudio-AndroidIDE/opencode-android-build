@@ -27,13 +27,38 @@ termux · sst opencode android port.
 curl -fsSL https://raw.githubusercontent.com/bd-loser/opencode-bionic/main/install.sh | bash
 ```
 
-Grabs the latest `.deb` from [Releases](https://github.com/bd-loser/opencode-bionic/releases),
-verifies its SHA256 checksum, and installs via `dpkg`. Pin a specific
-version with:
+Grabs the latest **stable** `.deb` from [Releases](https://github.com/bd-loser/opencode-bionic/releases),
+verifies its SHA256 checksum, and installs via `dpkg`.
+
+### Channels
+
+Stable builds come from an upstream opencode release tag. Prereleases are
+built from upstream's `dev` branch and are tagged `v<version>-dev.<short-sha>`
+— newer, but not something upstream has blessed.
 
 ```bash
-OPENCODE_VERSION=1.18.4 curl -fsSL https://raw.githubusercontent.com/bd-loser/opencode-bionic/main/install.sh | bash
+# newest stable (the default)
+curl -fsSL https://raw.githubusercontent.com/bd-loser/opencode-bionic/main/install.sh | bash
+
+# newest dev build
+curl -fsSL .../install.sh | OPENCODE_CHANNEL=prerelease bash
+
+# a specific upstream commit (any sha prefix, 4+ chars)
+curl -fsSL .../install.sh | OPENCODE_COMMIT=fe82a1b6 bash
+
+# an exact version, either kind
+curl -fsSL .../install.sh | OPENCODE_VERSION=1.18.15 bash
+curl -fsSL .../install.sh | OPENCODE_VERSION=1.18.15-dev.fe82a1b6 bash
 ```
+
+The default channel resolves through `/releases/latest`, which GitHub
+computes while ignoring prereleases — so a dev build can never reach a user
+who did not ask for one by name.
+
+Dev builds are produced automatically: `watch-upstream.yml` polls upstream
+every 2 days and, when there is no new upstream *release* to mirror, builds
+whatever new commits landed on `dev`. The five most recent are kept; older
+ones are pruned. Stable releases are never pruned.
 
 Manual install:
 
