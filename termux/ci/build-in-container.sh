@@ -47,8 +47,27 @@ mount | grep -E "workspace|overlay|out" || true
   || { echo "/out: NOT WRITABLE — abort"; exit 1; }
 echo "==========="
 
-pkg update -y
-pkg install -y git python curl dpkg
+# `pkg` picks a RANDOM mirror on every invocation:
+#
+#   Picking mirror: (32) .../chinese_mainland/mirrors.sau.edu.cn
+#
+# which makes this build a coin flip. A half-synced mirror serves a new
+# ncurses without the matching ncurses-ui-libs, and the install dies on a
+# dependency that is perfectly satisfiable upstream:
+#
+#   ncurses-ui-libs : Depends: ncurses (= 6.5.20240831-3)
+#     but 6.6.20260307+really6.5.20250830 is to be installed
+#   E: Unable to correct problems, you have held broken packages.
+#
+# Run 31246994833 got a good mirror and built fine; 31247242152, seven
+# minutes later on identical inputs, drew a stale one and failed. Pin the
+# canonical mirror and use apt directly so no rotation happens — verified
+# packages.termux.dev carries ncurses and ncurses-ui-libs at the same
+# version, which is what the rotation was breaking.
+echo "deb https://packages.termux.dev/apt/termux-main stable main" \
+  > "${PREFIX:-/data/data/com.termux/files/usr}/etc/apt/sources.list"
+apt update -y
+apt install -y git python curl dpkg
 
 # bun-termux install URL is intentionally hardcoded rather than read from
 # versions.json — it isn't tied to any opencode version.
