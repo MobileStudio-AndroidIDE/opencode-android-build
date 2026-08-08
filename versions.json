@@ -2,11 +2,11 @@
   "$schema": "./versions.schema.json",
   "opencode": "1.18.15",
   "opentui": {
-    "core": "0.4.10",
-    "keymap": "0.4.10",
-    "solid": "0.4.10",
-    "react": "0.4.10",
-    "androidArm64Native": "0.4.11"
+    "core": "0.5.1-bun",
+    "keymap": "0.5.1-bun",
+    "solid": "0.5.1-bun",
+    "react": "0.5.1-bun",
+    "androidArm64Native": "0.5.1-bun"
   },
   "bunTermux": {
     "installUrl": "https://raw.githubusercontent.com/bd-loser/bun-termux/main/scripts/install.sh"
