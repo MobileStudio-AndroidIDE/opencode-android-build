@@ -198,7 +198,8 @@ jobs:
           Bundled versions:
           - opencode: v$VERSION
           - @opentui/*: $(bun termux/ci/versions.ts print | grep OPENTUI_CORE= | cut -d= -f2)
-          EOF          # $FLAGS is intentionally word-split (--draft / --prerelease).
+          EOF
+          # $FLAGS is intentionally word-split (--draft / --prerelease).
           # shellcheck disable=SC2086
           gh release create "$TAG" $FLAGS \
             --title "v$RELEASE" \
