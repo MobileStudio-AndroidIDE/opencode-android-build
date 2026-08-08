@@ -8,6 +8,9 @@
 #   GITHUB_WORKSPACE   set by Actions; the checked-out repo
 #   OPENCODE_VERSION   optional; forwarded to the container script
 #   OPENCODE_CHANNEL   optional; forwarded to the container script
+#   OPENCODE_UPSTREAM_REF
+#                      optional; forwarded to the container script. Builds
+#                      from a branch/commit instead of a release tag.
 #
 # Output:
 #   $OUT_HOST/opencode         the built binary
@@ -38,6 +41,7 @@ echo "OUT_HOST=$OUT_HOST" >&2
 cat > "$OUT_HOST/build-env.sh" <<EOF
 export OPENCODE_VERSION='${OPENCODE_VERSION:-}'
 export OPENCODE_CHANNEL='${OPENCODE_CHANNEL:-}'
+export OPENCODE_UPSTREAM_REF='${OPENCODE_UPSTREAM_REF:-}'
 EOF
 chmod 0644 "$OUT_HOST/build-env.sh"
 

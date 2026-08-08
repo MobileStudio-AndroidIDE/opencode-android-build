@@ -7,6 +7,11 @@
 #   OPENCODE_VERSION  version string baked into the binary (also decides
 #                     which upstream tag to check out; default: 0.0.0-termux-ci)
 #   OPENCODE_CHANNEL  channel string (default: dev)
+#   OPENCODE_UPSTREAM_REF
+#                     optional; build from this branch/commit instead of the
+#                     tag implied by OPENCODE_VERSION. Set for dev
+#                     prereleases, where the stamped version (e.g.
+#                     1.18.15-dev.fe82a1b6) is not a tag upstream has.
 #
 # Mounts expected:
 #   /workspace  = the opencode-bionic checkout (this fork; read-only in practice)
@@ -27,11 +32,14 @@ if [ -f /out/build-env.sh ]; then
 fi
 OPENCODE_VERSION="${OPENCODE_VERSION:-0.0.0-termux-ci}"
 OPENCODE_CHANNEL="${OPENCODE_CHANNEL:-dev}"
+OPENCODE_UPSTREAM_REF="${OPENCODE_UPSTREAM_REF:-}"
+export OPENCODE_UPSTREAM_REF
 
 echo "=== diag ==="
 id || true
 echo "HOME=$HOME PREFIX=${PREFIX:-unset}"
 echo "OPENCODE_VERSION=$OPENCODE_VERSION OPENCODE_CHANNEL=$OPENCODE_CHANNEL"
+echo "OPENCODE_UPSTREAM_REF=${OPENCODE_UPSTREAM_REF:-<none, using tag>}"
 mount | grep -E "workspace|overlay|out" || true
 (touch /workspace/.write_test && rm -f /workspace/.write_test && echo "workspace: WRITABLE") \
   || echo "workspace: READ-ONLY for this user"
@@ -55,8 +63,12 @@ rm -rf "$BUILD_ROOT"
 # Use the version pinned in /workspace/versions.json unless we're being
 # asked to build a specific tag. When OPENCODE_VERSION is the default
 # placeholder, drop it so prepare-build-tree.sh falls back to versions.json.
+#
+# With OPENCODE_UPSTREAM_REF set, fetch-upstream.sh ignores the version
+# entirely — pass nothing rather than a "v1.18.15-dev.abc1234" that would
+# read like a tag we expect to exist.
 FETCH_ARGS=("$BUILD_ROOT")
-if [ "$OPENCODE_VERSION" != "0.0.0-termux-ci" ]; then
+if [ -z "$OPENCODE_UPSTREAM_REF" ] && [ "$OPENCODE_VERSION" != "0.0.0-termux-ci" ]; then
   FETCH_ARGS+=("v$OPENCODE_VERSION")
 fi
 
