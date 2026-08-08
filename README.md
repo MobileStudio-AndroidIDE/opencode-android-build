@@ -56,9 +56,10 @@ computes while ignoring prereleases — so a dev build can never reach a user
 who did not ask for one by name.
 
 Dev builds are produced automatically: `watch-upstream.yml` polls upstream
-every 2 days and, when there is no new upstream *release* to mirror, builds
-whatever new commits landed on `dev`. The five most recent are kept; older
-ones are pruned. Stable releases are never pruned.
+every 12 hours and, when there is no new upstream *release* to mirror, builds
+whatever new commits landed on `dev`. The five most recent are kept — about
+2.5 days of history at that cadence — and older ones are pruned. Stable
+releases are never pruned.
 
 Manual install:
 
@@ -122,7 +123,7 @@ opencode-bionic/
 │   └── setup.sh, rebuild-opencode.sh, ...   # local dev workflows
 └── .github/workflows/
     ├── release.yml              # build + publish a .deb + create release
-    └── watch-upstream.yml       # every 2 days: bump versions.json + release
+    └── watch-upstream.yml       # every 12h: bump versions.json + release
 ```
 
 Upstream is fetched fresh at build time via `git clone --depth 1 -b v$(jq -r
@@ -218,9 +219,10 @@ Configuration is identical to upstream — see
 [opencode docs](https://opencode.ai/docs).
 
 **Is it up to date with upstream?**
-Yes. `.github/workflows/watch-upstream.yml` polls upstream every 2 days,
+Yes. `.github/workflows/watch-upstream.yml` polls upstream every 12 hours,
 bumps `versions.json`, rebuilds, and publishes a matching release
-automatically. Version parity is a design goal.
+automatically. Between upstream releases it builds new `dev` commits as
+prereleases — see [Channels](#channels). Version parity is a design goal.
 
 **How does it compare to Claude Code / Cursor / Aider?**
 opencode is the underlying agent — this repo just makes it run on Android.

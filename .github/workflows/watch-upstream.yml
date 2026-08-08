@@ -1,6 +1,6 @@
 name: watch-upstream
 
-# Polls anomalyco/opencode (fka sst/opencode) for new work every 2 days.
+# Polls anomalyco/opencode (fka sst/opencode) for new work every 12 hours.
 # Three responsibilities:
 #
 # 1. Bump: if upstream has a RELEASE version we haven't shipped, bump
@@ -34,7 +34,9 @@ name: watch-upstream
 
 on:
   schedule:
-    - cron: "17 2 */2 * *"
+    # 02:17 and 14:17 UTC. Off-minute on purpose: the top of the hour is
+    # when every other cron on the platform fires.
+    - cron: "17 2,14 * * *"
   workflow_dispatch:
     inputs:
       dry_run:
@@ -57,9 +59,9 @@ concurrency:
 env:
   UPSTREAM: anomalyco/opencode
   OURS: ${{ github.repository }}
-  # How many dev prereleases to keep. One every 2 days is ~180/year, which
-  # buries the stable releases in the list and the Releases page; the old
-  # ones are of no use to anyone once a newer dev build exists.
+  # How many dev prereleases to keep. Two a day is ~730/year, which buries
+  # the stable releases in the list and the Releases page; the old ones are
+  # of no use to anyone once a newer dev build exists.
   DEV_KEEP: "5"
 
 jobs:
