@@ -133,7 +133,7 @@ echo ""
 echo "=== Critical package check ==="
 CRITICAL_OK=0
 CRITICAL_FAIL=0
-for pkg in @opentui/solid @opentui/keymap solid-js effect yargs zod @xincli/opentui-core-android-arm64; do
+for pkg in @opentui/solid @opentui/keymap solid-js effect yargs zod @androidtui/core-android-arm64; do
   if [ -f "node_modules/$pkg/package.json" ]; then
     ok "$pkg"
     CRITICAL_OK=$((CRITICAL_OK + 1))
@@ -152,7 +152,7 @@ else
 fi
 
 # Check native .so
-SO_PATH="node_modules/@xincli/opentui-core-android-arm64/libopentui.so"
+SO_PATH="node_modules/@androidtui/core-android-arm64/libopentui.so"
 if [ -f "$SO_PATH" ]; then
   ok "libopentui.so: present"
 else

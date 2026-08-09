@@ -59,7 +59,7 @@ header "Step 2: bun install"
 cd "$BUILD_DIR"
 bun install 2>&1 | sed 's/^/  /' || fail "bun install failed"
 
-# Verify @opentui/core resolves to @xincli fork. Bun's isolated linker
+# Verify @opentui/core resolves to @androidtui fork. Bun's isolated linker
 # places it in packages/<ws>/node_modules; we probe known locations.
 CORE_PKG_PATH=""
 for cand in \
@@ -72,8 +72,8 @@ do
 done
 [ -n "$CORE_PKG_PATH" ] || fail "@opentui/core not resolvable — catalog pin missing?"
 CORE_NAME=$(python3 -c "import json; print(json.load(open('$CORE_PKG_PATH')).get('name','?'))")
-[ "$CORE_NAME" = "@xincli/opentui-core" ] || fail "@opentui/core is $CORE_NAME (expected @xincli/opentui-core)"
-ok "@opentui/core → @xincli/opentui-core"
+[ "$CORE_NAME" = "@androidtui/core" ] || fail "@opentui/core is $CORE_NAME (expected @androidtui/core)"
+ok "@opentui/core → @androidtui/core"
 
 header "Step 3: Build compiled binary"
 OPENCODE_ROOT="$BUILD_DIR" bash "$SCRIPT_DIR/build-opencode-termux.sh"

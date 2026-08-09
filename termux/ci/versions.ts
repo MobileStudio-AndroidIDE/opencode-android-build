@@ -86,9 +86,9 @@ function checkCatalogOpentui(target: string): Check | null {
   const file = path.join(target, "package.json")
   if (!existsSync(file)) return null
   const cat = readJson(file).workspaces?.catalog ?? {}
-  const wantCore = `npm:@xincli/opentui-core@${versions.opentui.core}`
-  const wantKm = `npm:@xincli/opentui-keymap@${versions.opentui.keymap}`
-  const wantSolid = `npm:@xincli/opentui-solid@${versions.opentui.solid}`
+  const wantCore = `npm:@androidtui/core@${versions.opentui.core}`
+  const wantKm = `npm:@androidtui/keymap@${versions.opentui.keymap}`
+  const wantSolid = `npm:@androidtui/solid@${versions.opentui.solid}`
   const drifted =
     cat["@opentui/core"] !== wantCore ||
     cat["@opentui/keymap"] !== wantKm ||
@@ -116,7 +116,7 @@ function checkCatalogOpentui(target: string): Check | null {
 // Declared under UPSTREAM's name, aliased to the fork's package:
 //
 //   "@opentui/core-android-arm64":
-//       "npm:@xincli/opentui-core-android-arm64@<version>"
+//       "npm:@androidtui/core-android-arm64@<version>"
 //
 // That is the name packages/core/src/platform/android-native.ts imports
 // as a string literal, and the literal is what makes `bun build --compile`
@@ -132,27 +132,27 @@ function checkAndroidNative(target: string): Check | null {
   const snap = readJson(file)
   const version = versions.opentui.androidArm64Native
   const key = "@opentui/core-android-arm64"
-  const want = `npm:@xincli/opentui-core-android-arm64@${version}`
+  const want = `npm:@androidtui/core-android-arm64@${version}`
   const curOverride = snap.overrides?.[key]
   const curOptional = snap.optionalDependencies?.[key]
-  // A literal @xincli key left over from before the alias switch would
+  // A literal @androidtui key left over from before the alias switch would
   // still install, so it has to be reported as drift rather than ignored.
   const stale =
-    snap.overrides?.["@xincli/opentui-core-android-arm64"] !== undefined ||
-    snap.optionalDependencies?.["@xincli/opentui-core-android-arm64"] !== undefined
+    snap.overrides?.["@androidtui/core-android-arm64"] !== undefined ||
+    snap.optionalDependencies?.["@androidtui/core-android-arm64"] !== undefined
   const drifted = curOverride !== want || curOptional !== want || stale
   return {
     name: "root android-arm64 native pin",
     ok: !drifted,
     msg: drifted
-      ? `override=${curOverride} optional=${curOptional}${stale ? " (stale @xincli key)" : ""} → ${want}`
+      ? `override=${curOverride} optional=${curOptional}${stale ? " (stale @androidtui key)" : ""} → ${want}`
       : `@${version} (aliased)`,
     fix: () => {
       const pkg = readJson(file)
       pkg.overrides ??= {}
       pkg.optionalDependencies ??= {}
-      delete pkg.overrides["@xincli/opentui-core-android-arm64"]
-      delete pkg.optionalDependencies["@xincli/opentui-core-android-arm64"]
+      delete pkg.overrides["@androidtui/core-android-arm64"]
+      delete pkg.optionalDependencies["@androidtui/core-android-arm64"]
       pkg.overrides[key] = want
       pkg.optionalDependencies[key] = want
       writeJson(file, pkg)
@@ -206,7 +206,7 @@ function checkRootConfigCleanup(target: string): Check | null {
 
 // Rewrite @opentui/* refs across every workspace package.json.
 //
-// Preserves `npm:@xincli/opentui-*@…` alias shape everywhere it exists.
+// Preserves `npm:@androidtui/*@…` alias shape everywhere it exists.
 // Skips `catalog:` and `workspace:` sentinels — those already resolve via
 // the root catalog we pinned above. Silently no-ops when the target has no
 // package.json files (e.g. repo without an upstream clone attached).
@@ -220,9 +220,9 @@ async function applyOpentuiWorkspaces(target: string): Promise<number> {
     "@opentui/solid": versions.opentui.solid,
   }
   const aliasFor: Record<(typeof OPENTUI_KEYS)[number], string> = {
-    "@opentui/core": `npm:@xincli/opentui-core@${versions.opentui.core}`,
-    "@opentui/keymap": `npm:@xincli/opentui-keymap@${versions.opentui.keymap}`,
-    "@opentui/solid": `npm:@xincli/opentui-solid@${versions.opentui.solid}`,
+    "@opentui/core": `npm:@androidtui/core@${versions.opentui.core}`,
+    "@opentui/keymap": `npm:@androidtui/keymap@${versions.opentui.keymap}`,
+    "@opentui/solid": `npm:@androidtui/solid@${versions.opentui.solid}`,
   }
 
   const files = (await Array.fromAsync(new Bun.Glob("**/package.json").scan({ cwd: target }))).filter(
@@ -239,7 +239,7 @@ async function applyOpentuiWorkspaces(target: string): Promise<number> {
       if (typeof cur !== "string") continue
       if (cur === "catalog:" || cur.startsWith("workspace:")) continue
       let next: string
-      if (cur.startsWith("npm:@xincli/opentui-")) {
+      if (cur.startsWith("npm:@androidtui/")) {
         next = aliasFor[key]
       } else {
         const m = cur.match(/^([\^~]|>=)/)
@@ -275,14 +275,14 @@ function applyReadme(): boolean {
   if (!existsSync(README)) return false
   const orig = readFileSync(README, "utf8")
   const badges =
-    `[![opentui-js](https://img.shields.io/badge/opentui--js-@xincli%40${versions.opentui.core}-green.svg)](https://www.npmjs.com/package/@xincli/opentui-core)\n` +
-    `[![opentui-so](https://img.shields.io/badge/libopentui.so-@xincli%40${versions.opentui.androidArm64Native}-green.svg)](https://www.npmjs.com/package/@xincli/opentui-core-android-arm64)`
+    `[![opentui-js](https://img.shields.io/badge/opentui--js-@androidtui%40${versions.opentui.core}-green.svg)](https://www.npmjs.com/package/@androidtui/core)\n` +
+    `[![opentui-so](https://img.shields.io/badge/libopentui.so-@androidtui%40${versions.opentui.androidArm64Native}-green.svg)](https://www.npmjs.com/package/@androidtui/core-android-arm64)`
   const table =
     `| Component | Version |\n` +
     `|---|---|\n` +
     `| opencode (upstream) | \`${versions.opencode}\` |\n` +
-    `| \`@opentui/{core,keymap,solid}\` (JS, via \`@xincli\`) | \`${versions.opentui.core}\` |\n` +
-    `| \`@xincli/opentui-core-android-arm64\` (native \`.so\`) | \`${versions.opentui.androidArm64Native}\` |\n` +
+    `| \`@opentui/{core,keymap,solid}\` (JS, via \`@androidtui\`) | \`${versions.opentui.core}\` |\n` +
+    `| \`@androidtui/core-android-arm64\` (native \`.so\`) | \`${versions.opentui.androidArm64Native}\` |\n` +
     `| \`bun-termux\` runtime | tracked at [bd-loser/bun-termux](https://github.com/bd-loser/bun-termux) |`
   let out = orig.replace(
     /<!-- versions:badges -->[\s\S]*?<!-- \/versions:badges -->/,

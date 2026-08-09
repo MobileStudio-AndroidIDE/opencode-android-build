@@ -1,6 +1,6 @@
 # shellcheck shell=bash
 # Source this file to load the canonical version pins from versions.json into
-# your shell script. Sets XINCLI_*_VERSION variables that termux/*.sh scripts
+# your shell script. Sets ANDROIDTUI_*_VERSION variables that termux/*.sh scripts
 # already expect.
 #
 # Usage:
@@ -11,7 +11,7 @@
 # Behavior:
 #   - If versions.json exists, its values become the defaults.
 #   - Environment vars set BEFORE sourcing this file win — so ad-hoc overrides
-#     (e.g. `XINCLI_CORE_VERSION=0.4.11 bash termux/rebuild-opencode.sh`) still
+#     (e.g. `ANDROIDTUI_CORE_VERSION=0.4.11 bash termux/rebuild-opencode.sh`) still
 #     work, and CI still gets its pinned values.
 #   - If versions.json is missing (e.g. running outside the repo), the file is
 #     a no-op and callers use their own hardcoded fallbacks.
@@ -63,16 +63,16 @@ PY
 if [ -n "$__versions_json_file" ] && command -v python3 >/dev/null 2>&1; then
   eval "$(__versions_dump_py "$__versions_json_file")"
   # Only set each variable if the caller has not already set it, so:
-  #   XINCLI_CORE_VERSION=0.4.11 bash rebuild-opencode.sh
+  #   ANDROIDTUI_CORE_VERSION=0.4.11 bash rebuild-opencode.sh
   # still wins for local experiments.
-  : "${XINCLI_CORE_VERSION:=$__V_CORE}"
-  : "${XINCLI_KEYMAP_VERSION:=$__V_KEYMAP}"
-  : "${XINCLI_SOLID_VERSION:=$__V_SOLID}"
-  : "${XINCLI_REACT_VERSION:=$__V_REACT}"
-  : "${XINCLI_ANDROID_VERSION:=$__V_ANDROID}"
+  : "${ANDROIDTUI_CORE_VERSION:=$__V_CORE}"
+  : "${ANDROIDTUI_KEYMAP_VERSION:=$__V_KEYMAP}"
+  : "${ANDROIDTUI_SOLID_VERSION:=$__V_SOLID}"
+  : "${ANDROIDTUI_REACT_VERSION:=$__V_REACT}"
+  : "${ANDROIDTUI_ANDROID_VERSION:=$__V_ANDROID}"
   : "${OPENCODE_VERSION_PIN:=$__V_OPENCODE}"
-  export XINCLI_CORE_VERSION XINCLI_KEYMAP_VERSION XINCLI_SOLID_VERSION \
-         XINCLI_REACT_VERSION XINCLI_ANDROID_VERSION OPENCODE_VERSION_PIN
+  export ANDROIDTUI_CORE_VERSION ANDROIDTUI_KEYMAP_VERSION ANDROIDTUI_SOLID_VERSION \
+         ANDROIDTUI_REACT_VERSION ANDROIDTUI_ANDROID_VERSION OPENCODE_VERSION_PIN
   unset __V_CORE __V_KEYMAP __V_SOLID __V_REACT __V_ANDROID __V_OPENCODE
 fi
 

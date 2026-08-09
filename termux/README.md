@@ -2,7 +2,7 @@
 
 Fork architecture for shipping [anomalyco/opencode](https://github.com/anomalyco/opencode)
 (fka `sst/opencode`) on Android/Termux, using [bun-termux](https://github.com/bd-loser/bun-termux)
-and [@xincli/opentui-*](https://www.npmjs.com/~xincli).
+and [@androidtui/*](https://www.npmjs.com/~androidtui).
 
 ## The delta
 
@@ -12,7 +12,7 @@ rejects it. Our fork adds Termux support with a small, well-scoped delta:
 
 | Kind | File | How it's expressed |
 |---|---|---|
-| Source | `bunfig.toml` | patch — adds `@xincli/*` to `minimumReleaseAgeExcludes` |
+| Source | `bunfig.toml` | patch — adds `@androidtui/*` to `minimumReleaseAgeExcludes` |
 | Source (new file) | `packages/opencode/script/build-termux.ts` | patch — the compile script (embeds bun-termux, targets aarch64) |
 | Source | `packages/core/src/filesystem/fff.bun.ts` | patch — lazy-load `@ff-labs/fff-bun` (no Android binary; falls back to ripgrep) |
 | Config | `package.json` (root) | `versions.ts` — catalog aliases, `optionalDependencies`, remove `postinstall`/`prepare`/`trustedDeps`/fff-bun patch entry |
@@ -37,7 +37,7 @@ opencode-bionic/                   ← this repo
 └── termux/
     ├── README.md                  ← this file
     ├── patches/                   ← quilt-style unified diffs
-    │   ├── 0001-termux-add-xincli-to-minimumReleaseAgeExcludes.patch
+    │   ├── 0001-termux-add-androidtui-to-minimumReleaseAgeExcludes.patch
     │   ├── 0002-termux-add-build-termux.ts-compile-script.patch
     │   └── 0003-termux-lazy-load-ff-labs-fff-bun.patch
     ├── ci/                        ← build pipeline
@@ -56,7 +56,7 @@ opencode-bionic/                   ← this repo
     ├── clean-reinstall.sh         ← nuke node_modules and reinstall
     ├── install-opencode-termux.sh ← copy binary to $PREFIX
     ├── run-opencode-termux.sh     ← dev-mode launcher (bun run)
-    ├── release-opentui.sh         ← publish @xincli npm packages
+    ├── release-opentui.sh         ← publish @androidtui npm packages
     └── test-opentui-isolated.sh   ← smoke test the native binding
 ```
 

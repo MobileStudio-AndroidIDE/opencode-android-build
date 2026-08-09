@@ -11,8 +11,8 @@
 [![Downloads](https://img.shields.io/github/downloads/bd-loser/opencode-bionic/total.svg)](https://github.com/bd-loser/opencode-bionic/releases)
 [![Bun](https://img.shields.io/badge/Bun-1.3.14%20(bd--loser%20fork)-blue.svg)](https://github.com/bd-loser/bun-termux)
 <!-- versions:badges -->
-[![opentui-js](https://img.shields.io/badge/opentui--js-@xincli%400.5.1-green.svg)](https://www.npmjs.com/package/@xincli/opentui-core)
-[![opentui-so](https://img.shields.io/badge/libopentui.so-@xincli%400.5.1-green.svg)](https://www.npmjs.com/package/@xincli/opentui-core-android-arm64)
+[![opentui-js](https://img.shields.io/badge/opentui--js-@androidtui%400.5.1-green.svg)](https://www.npmjs.com/package/@androidtui/core)
+[![opentui-so](https://img.shields.io/badge/libopentui.so-@androidtui%400.5.1-green.svg)](https://www.npmjs.com/package/@androidtui/core-android-arm64)
 <!-- /versions:badges -->
 
 **Keywords:** opencode android · opencode termux · opencode aarch64 ·
@@ -90,8 +90,8 @@ required three separate pieces of work, all maintained in this org:
 | Component | What was done | Repo |
 |---|---|---|
 | **Bun runtime** | Patched Bun 1.3.14 to run under Bionic libc — FFI, TinyCC, MTE, SELinux fixes. Ships as a Termux `.deb`. | [bd-loser/bun-termux](https://github.com/bd-loser/bun-termux) (original, not a fork) |
-| **opentui native lib** | Rebuilt `libopentui.so` for `android-arm64` (Bionic ABI, 16 KiB page-size aligned). Published as [`@xincli/opentui-core-android-arm64`](https://www.npmjs.com/package/@xincli/opentui-core-android-arm64) plus the `@xincli/opentui-{core,keymap,solid}` JS packages that route to it. | [bd-loser/opentui](https://github.com/bd-loser/opentui) (fork of anomalyco/opentui) |
-| **opencode delta** | Quilt-style patch set on top of upstream opencode that swaps `@opentui/*` for the `@xincli/*` builds via Bun workspace catalog pins, and fixes the Termux-specific build script. | **bd-loser/opencode-bionic** (this repo, original) |
+| **opentui native lib** | Rebuilt `libopentui.so` for `android-arm64` (Bionic ABI, 16 KiB page-size aligned). Published as [`@androidtui/core-android-arm64`](https://www.npmjs.com/package/@androidtui/core-android-arm64) plus the `@androidtui/{core,keymap,solid}` JS packages that route to it. | [bd-loser/opentui](https://github.com/bd-loser/opentui) (fork of anomalyco/opentui) |
+| **opencode delta** | Quilt-style patch set on top of upstream opencode that swaps `@opentui/*` for the `@androidtui/*` builds via Bun workspace catalog pins, and fixes the Termux-specific build script. | **bd-loser/opencode-bionic** (this repo, original) |
 
 Everything above was authored by [@bd-loser](https://github.com/bd-loser).
 Upstream credit goes to [opencode](https://github.com/anomalyco/opencode)
@@ -104,7 +104,7 @@ This repo does **not** vendor an upstream clone. It holds only the delta:
 
 ```
 opencode-bionic/
-├── versions.json              # pinned upstream version + @xincli versions
+├── versions.json              # pinned upstream version + @androidtui versions
 ├── install.sh                 # curl | bash installer
 ├── termux/
 │   ├── patches/               # unified-diff patches applied to upstream
@@ -143,8 +143,8 @@ picks up the bump on its next run.
 | Component | Version |
 |---|---|
 | opencode (upstream) | `1.18.15` |
-| `@opentui/{core,keymap,solid}` (JS, via `@xincli`) | `0.5.1` |
-| `@xincli/opentui-core-android-arm64` (native `.so`) | `0.5.1` |
+| `@opentui/{core,keymap,solid}` (JS, via `@androidtui`) | `0.5.1` |
+| `@androidtui/core-android-arm64` (native `.so`) | `0.5.1` |
 | `bun-termux` runtime | tracked at [bd-loser/bun-termux](https://github.com/bd-loser/bun-termux) |
 <!-- /versions:table -->
 
@@ -209,7 +209,7 @@ handled by the patched Bun.
 **Is this the same as running `npm install -g opencode` in Termux?**
 No, and that path is broken. Upstream opencode pulls in `@opentui/core`,
 which tries to load a glibc `.so` — Bionic rejects it. This build swaps in
-`@xincli/opentui-*` (Bionic-native) and ships a single self-contained
+`@androidtui/*` (Bionic-native) and ships a single self-contained
 `opencode` binary compiled by Bun.
 
 **Which LLM providers work?**
@@ -233,7 +233,7 @@ Feature comparisons belong to upstream opencode.
 | Repo | Purpose | Fork? |
 |---|---|---|
 | [bd-loser/bun-termux](https://github.com/bd-loser/bun-termux) | Bun v1.3.14 patched for Bionic Android (FFI, TinyCC, MTE, SELinux). | Original |
-| [bd-loser/opentui](https://github.com/bd-loser/opentui) | opentui + native `libopentui.so` rebuilt for android-arm64. Publishes the `@xincli/*` npm packages. | Fork of [anomalyco/opentui](https://github.com/anomalyco/opentui) |
+| [bd-loser/opentui](https://github.com/bd-loser/opentui) | opentui + native `libopentui.so` rebuilt for android-arm64. Publishes the `@androidtui/*` npm packages. | Fork of [anomalyco/opentui](https://github.com/anomalyco/opentui) |
 | **bd-loser/opencode-bionic** (this repo) | opencode delta + release pipeline that ties it all together. | Original |
 
 ## License

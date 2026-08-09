@@ -60,22 +60,22 @@ index 0000000..f5ad162
 +const plugin = createSolidTransformPlugin()
 +
 +// -----------------------------------------------------------------------------
-+// opentuiAliasPlugin — remap bare @opentui/* imports to @xincli/opentui-*.
++// opentuiAliasPlugin — remap bare @opentui/* imports to @androidtui/*.
 +// -----------------------------------------------------------------------------
-+// The published @xincli/opentui-{keymap,solid} packages contain compiled JS
++// The published @androidtui/{keymap,solid} packages contain compiled JS
 +// that hardcodes bare imports like `import "@opentui/keymap"`, `"@opentui/solid"`,
 +// and subpath variants (/extras, /addons, /html, /opentui, /react, /solid,
 +// /components, /jsx-runtime, /jsx-dev-runtime, /extras/graph, /addons/opentui).
 +//
 +// Root package.json `overrides` and workspace `catalog:` pins rewrite refs
-+// from *consumers* but do NOT propagate into a nested @xincli package's own
++// from *consumers* but do NOT propagate into a nested @androidtui package's own
 +// tree under bun's isolated linker (node_modules/.bun/<pkg>@ver/...). The
-+// bundler sees `import "@opentui/keymap"` inside @xincli/opentui-keymap's own
++// bundler sees `import "@opentui/keymap"` inside @androidtui/keymap's own
 +// runtime-modules.js and can't resolve it — @opentui/keymap simply isn't in
 +// that package's isolated scope.
 +//
 +// This plugin fixes it at bundle time: intercept every "@opentui/{keymap,solid}"
-+// specifier (and their subpaths), rewrite to the matching "@xincli/*" package
++// specifier (and their subpaths), rewrite to the matching "@androidtui/*" package
 +// (which IS installed and IS in scope of the root workspace), and hand off to
 +// bun's default resolver.
 +// -----------------------------------------------------------------------------
@@ -83,25 +83,25 @@ index 0000000..f5ad162
 +  name: "opentui-alias",
 +  setup(build) {
 +    const remap: Record<string, string> = {
-+      "@opentui/keymap": "@xincli/opentui-keymap",
-+      "@opentui/solid": "@xincli/opentui-solid",
-+      "@opentui/core": "@xincli/opentui-core",
++      "@opentui/keymap": "@androidtui/keymap",
++      "@opentui/solid": "@androidtui/solid",
++      "@opentui/core": "@androidtui/core",
 +    }
 +    build.onResolve({ filter: /^@opentui\// }, (args) => {
-+      // Only rewrite when the importer itself is a @xincli/opentui-* file.
++      // Only rewrite when the importer itself is a @androidtui/* file.
 +      // Consumer packages (packages/opencode, packages/tui, etc.) still
 +      // declare `@opentui/*` in their package.json — catalog pins alias
-+      // those on disk to the @xincli tarball, but the specifier they
++      // those on disk to the @androidtui tarball, but the specifier they
 +      // resolve is still `@opentui/*`. If we rewrite unconditionally,
-+      // consumer imports fail with `Cannot find module @xincli/...`
-+      // because their isolated node_modules has no @xincli/* entry.
++      // consumer imports fail with `Cannot find module @androidtui/...`
++      // because their isolated node_modules has no @androidtui/* entry.
 +      //
 +      // The nested-package problem (bun's isolated linker not letting a
-+      // @xincli package see @opentui/*) only affects files INSIDE the
-+      // @xincli tree (node_modules/.bun/@xincli+opentui-*@ver/.../@xincli/
++      // @androidtui package see @opentui/*) only affects files INSIDE the
++      // @androidtui tree (node_modules/.bun/@androidtui+opentui-*@ver/.../@androidtui/
 +      // opentui-*/src/*.js), so scope the rewrite to those importers.
 +      const importer = args.importer || ""
-+      if (!/@xincli[/+]opentui-/.test(importer)) return null
++      if (!/@androidtui[/+]opentui-/.test(importer)) return null
 +      for (const [from, to] of Object.entries(remap)) {
 +        if (args.path === from || args.path.startsWith(from + "/")) {
 +          const rewritten = to + args.path.slice(from.length)

@@ -1,26 +1,26 @@
 #!/data/data/com.termux/files/usr/bin/bash
 # =============================================================================
-# test-opentui-isolated.sh — smoke test for @xincli/opentui-core on Termux
+# test-opentui-isolated.sh — smoke test for @androidtui/core on Termux
 # =============================================================================
 #
 # WHAT THIS DOES:
 #   Creates a minimal test project (3 deps only, no opencode) and verifies
-#   that @xincli/opentui-core + @opentui/solid work on Termux. This isolates
+#   that @androidtui/core + @opentui/solid work on Termux. This isolates
 #   the opentui FFI layer from opencode's 2000+ dependencies.
 #
 # WHY:
 #   If opencode fails to start, we need to know whether the failure is in:
 #     (a) opentui itself (FFI, .so loading, MTE)  → this test will fail too
-#     (b) @opentui/solid API compat with @xincli/core  → this test will fail
+#     (b) @opentui/solid API compat with @androidtui/core  → this test will fail
 #     (c) opencode's own code (bun-pty, sqlite, etc.)  → this test will PASS
 #
 #   If this test passes, we know opentui works and the problem is in opencode.
 #   If this test fails, we know to fix opentui first (or fork @opentui/solid).
 #
 # WHAT IT TESTS:
-#   1. `bun install` succeeds (downloads @xincli/opentui-core +
-#      @xincli/opentui-core-android-arm64 + @opentui/solid)
-#   2. `@xincli/opentui-core` can be imported (JS loads OK)
+#   1. `bun install` succeeds (downloads @androidtui/core +
+#      @androidtui/core-android-arm64 + @opentui/solid)
+#   2. `@androidtui/core` can be imported (JS loads OK)
 #   3. `createCliRenderer()` works (FFI loads libopentui.so OK, MTE doesn't
 #      crash, renderer starts)
 #   4. `@opentui/solid`'s `render()` works (Solid reconciler + opentui core
@@ -42,7 +42,7 @@
 #     SIGABRT                                               → MTE/FFI crash
 #
 #   If @opentui/solid API compat fails, you'll see:
-#     "Cannot find export X in @xincli/opentui-core"  → API break
+#     "Cannot find export X in @androidtui/core"  → API break
 #     "TypeError: ... is not a function"              → renamed/removed API
 #
 # =============================================================================
@@ -91,9 +91,9 @@ mkdir -p "$TEST_DIR"
 cd "$TEST_DIR"
 
 # Minimal package.json — only 3 deps
-# Clean v2 approach: all @xincli packages published at 0.4.10, so we use
-# npm: aliases directly. No overrides needed — @xincli/opentui-solid
-# directly depends on @xincli/opentui-core in its own dependencies.
+# Clean v2 approach: all @androidtui packages published at 0.4.10, so we use
+# npm: aliases directly. No overrides needed — @androidtui/solid
+# directly depends on @androidtui/core in its own dependencies.
 cat > package.json <<EOF
 {
   "name": "opentui-test",
@@ -101,16 +101,16 @@ cat > package.json <<EOF
   "type": "module",
   "private": true,
   "dependencies": {
-    "@opentui/core": "npm:@xincli/opentui-core@${XINCLI_CORE_VERSION}",
-    "@opentui/solid": "npm:@xincli/opentui-solid@${XINCLI_SOLID_VERSION}",
+    "@opentui/core": "npm:@androidtui/core@${ANDROIDTUI_CORE_VERSION}",
+    "@opentui/solid": "npm:@androidtui/solid@${ANDROIDTUI_SOLID_VERSION}",
     "solid-js": "1.9.10"
   },
   "optionalDependencies": {
-    "@xincli/opentui-core-android-arm64": "${XINCLI_ANDROID_VERSION}"
+    "@androidtui/core-android-arm64": "${ANDROIDTUI_ANDROID_VERSION}"
   }
 }
 EOF
-ok "package.json created (clean v2: all @xincli packages, no overrides needed)"
+ok "package.json created (clean v2: all @androidtui packages, no overrides needed)"
 
 # --- bun install -------------------------------------------------------------
 echo ""
@@ -131,17 +131,17 @@ if [ ! -d "node_modules/@opentui/core" ]; then
   exit 1
 fi
 
-# Check it's the @xincli fork
+# Check it's the @androidtui fork
 CORE_NAME=$("$BUN_BIN" -e "console.log(require('./node_modules/@opentui/core/package.json').name)" 2>/dev/null || echo "?")
-if [ "$CORE_NAME" = "@xincli/opentui-core" ]; then
-  ok "@opentui/core is the @xincli fork"
+if [ "$CORE_NAME" = "@androidtui/core" ]; then
+  ok "@opentui/core is the @androidtui fork"
 else
-  fail "@opentui/core is NOT the @xincli fork (got: $CORE_NAME)"
+  fail "@opentui/core is NOT the @androidtui fork (got: $CORE_NAME)"
   exit 1
 fi
 
 # Check native .so
-SO_PATH="node_modules/@xincli/opentui-core-android-arm64/libopentui.so"
+SO_PATH="node_modules/@androidtui/core-android-arm64/libopentui.so"
 if [ -f "$SO_PATH" ]; then
   ok "libopentui.so found: $SO_PATH"
   SO_TYPE=$(file -b "$SO_PATH" 2>/dev/null || echo "?")
@@ -158,7 +158,7 @@ if [ -f "$SO_PATH" ]; then
 else
   fail "libopentui.so not found at $SO_PATH"
   echo "The optionalDependency didn't install. Try:" >&2
-  echo "  bun add @xincli/opentui-core-android-arm64@${XINCLI_ANDROID_VERSION}" >&2
+  echo "  bun add @androidtui/core-android-arm64@${ANDROIDTUI_ANDROID_VERSION}" >&2
   exit 1
 fi
 
@@ -171,18 +171,18 @@ else
 fi
 
 # CRITICAL: verify @opentui/solid does NOT have a nested upstream @opentui/core
-# Since 0.4.10, @xincli/opentui-solid directly depends on @xincli/opentui-core
+# Since 0.4.10, @androidtui/solid directly depends on @androidtui/core
 # via npm: alias — so there's no nested upstream copy to worry about.
 # But we still check for belt-and-suspenders safety.
 NESTED_CORE="node_modules/@opentui/solid/node_modules/@opentui/core"
 if [ -d "$NESTED_CORE" ]; then
   NESTED_NAME=$("$BUN_BIN" -e "console.log(require('./$NESTED_CORE/package.json').name)" 2>/dev/null || echo "?")
-  if [ "$NESTED_NAME" = "@xincli/opentui-core" ]; then
-    ok "nested @opentui/core inside @opentui/solid is @xincli fork (direct dep — no override needed)"
+  if [ "$NESTED_NAME" = "@androidtui/core" ]; then
+    ok "nested @opentui/core inside @opentui/solid is @androidtui fork (direct dep — no override needed)"
   else
     fail "nested @opentui/core inside @opentui/solid is upstream ($NESTED_NAME)"
-    echo "  This should not happen with @xincli/opentui-solid@0.4.10+." >&2
-    echo "  The package should directly depend on @xincli/opentui-core." >&2
+    echo "  This should not happen with @androidtui/solid@0.4.10+." >&2
+    echo "  The package should directly depend on @androidtui/core." >&2
     exit 1
   fi
 else
@@ -239,8 +239,8 @@ if "$BUN_BIN" run app.tsx 2>&1; then
   ok "TEST PASSED — opentui + solid work on Termux"
   echo ""
   echo "This means:"
-  echo "  ✅ @xincli/opentui-core@0.4.10 FFI works (libopentui.so loads, no MTE crash)"
-  echo "  ✅ @xincli/opentui-solid@0.4.10 is API-compatible with @xincli/opentui-core@0.4.10"
+  echo "  ✅ @androidtui/core@0.4.10 FFI works (libopentui.so loads, no MTE crash)"
+  echo "  ✅ @androidtui/solid@0.4.10 is API-compatible with @androidtui/core@0.4.10"
   echo "  ✅ createCliRenderer() + render() + <box>/<text> all work"
   echo "  ✅ Renderer destroys cleanly (no exit race)"
   echo ""
@@ -256,15 +256,15 @@ else
   echo ""
   echo "  'opentui is not supported on the current platform'"
   echo "    → libopentui.so not found or dlopen failed"
-  echo "    → check: ls -la node_modules/@xincli/opentui-core-android-arm64/"
+  echo "    → check: ls -la node_modules/@androidtui/core-android-arm64/"
   echo ""
   echo "  'undefined symbol: opentui_*'"
-  echo "    → ABI mismatch between @xincli/opentui-core JS and the .so"
+  echo "    → ABI mismatch between @androidtui/core JS and the .so"
   echo "    → rebuild .so from same opentui version as the JS bindings"
   echo ""
-  echo "  'Cannot find export X in @xincli/opentui-core'"
-  echo "    → @xincli/opentui-solid@0.4.10 API break with @xincli/opentui-core@0.4.10"
-  echo "    → need to fork @opentui/solid, publish as @xincli/opentui-solid"
+  echo "  'Cannot find export X in @androidtui/core'"
+  echo "    → @androidtui/solid@0.4.10 API break with @androidtui/core@0.4.10"
+  echo "    → need to fork @opentui/solid, publish as @androidtui/solid"
   echo ""
   echo "  'TypeError: ... is not a function'"
   echo "    → same API break, different symptom"

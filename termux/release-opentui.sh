@@ -1,10 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/bash
 # =============================================================================
-# release-opentui.sh — orchestrate a full @xincli opentui release
+# release-opentui.sh — orchestrate a full @androidtui opentui release
 # =============================================================================
 #
 # WHAT THIS DOES:
-#   Orchestrates publishing all 5 @xincli opentui packages in dependency
+#   Orchestrates publishing all 5 @androidtui opentui packages in dependency
 #   order. Designed to run from your Termux phone (or any machine with
 #   the GitHub CLI / curl + a GH token).
 #
@@ -13,11 +13,11 @@
 #   package lands on npm before triggering the next.
 #
 # PUBLISH ORDER (strict — each depends on the previous):
-#   1. @xincli/opentui-core-android-arm64  (.so — via package-prebuilt.yml)
-#   2. @xincli/opentui-core                (JS — via publish-js-library.yml)
-#   3. @xincli/opentui-react               (JS — via publish-js-library.yml)
-#   4. @xincli/opentui-solid               (JS — via publish-solid.yml)
-#   5. @xincli/opentui-keymap              (JS — via publish-keymap.yml)
+#   1. @androidtui/core-android-arm64  (.so — via package-prebuilt.yml)
+#   2. @androidtui/core                (JS — via publish-js-library.yml)
+#   3. @androidtui/react               (JS — via publish-js-library.yml)
+#   4. @androidtui/solid               (JS — via publish-solid.yml)
+#   5. @androidtui/keymap              (JS — via publish-keymap.yml)
 #
 # PREREQUISITES:
 #   - GH_TOKEN env var set with repo + workflow permissions
@@ -180,27 +180,27 @@ if $SKIP_SO; then
   info "is unchanged and you only bumped the JS package versions."
 else
   trigger_workflow "package-prebuilt.yml" '{}' "Package Prebuilt Native (.so)"
-  verify_npm "@xincli/opentui-core-android-arm64" "$VERSION" "Step 1"
+  verify_npm "@androidtui/core-android-arm64" "$VERSION" "Step 1"
 fi
 
 # =============================================================================
 # Step 2: Publish core + react (single workflow publishes both)
 # =============================================================================
 trigger_workflow "publish-js-library.yml" "{\"version\":\"${VERSION}\",\"publish\":\"true\"}" "Publish JS Library (core + react)"
-verify_npm "@xincli/opentui-core" "$VERSION" "Step 2a"
-verify_npm "@xincli/opentui-react" "$VERSION" "Step 2b"
+verify_npm "@androidtui/core" "$VERSION" "Step 2a"
+verify_npm "@androidtui/react" "$VERSION" "Step 2b"
 
 # =============================================================================
 # Step 3: Publish solid
 # =============================================================================
 trigger_workflow "publish-solid.yml" "{\"version\":\"${VERSION}\",\"publish\":\"true\"}" "Publish opentui-solid"
-verify_npm "@xincli/opentui-solid" "$VERSION" "Step 3"
+verify_npm "@androidtui/solid" "$VERSION" "Step 3"
 
 # =============================================================================
 # Step 4: Publish keymap
 # =============================================================================
 trigger_workflow "publish-keymap.yml" "{\"version\":\"${VERSION}\",\"publish\":\"true\"}" "Publish opentui-keymap"
-verify_npm "@xincli/opentui-keymap" "$VERSION" "Step 4"
+verify_npm "@androidtui/keymap" "$VERSION" "Step 4"
 
 # =============================================================================
 # Summary
@@ -208,13 +208,13 @@ verify_npm "@xincli/opentui-keymap" "$VERSION" "Step 4"
 header "Release ${VERSION} complete!"
 
 echo ""
-echo "  All 5 @xincli packages published:"
-echo "    ✅ @xincli/opentui-core@${VERSION}"
-echo "    ✅ @xincli/opentui-react@${VERSION}"
-echo "    ✅ @xincli/opentui-solid@${VERSION}"
-echo "    ✅ @xincli/opentui-keymap@${VERSION}"
-echo "    ✅ @xincli/opentui-core-android-arm64@${VERSION}"
+echo "  All 5 @androidtui packages published:"
+echo "    ✅ @androidtui/core@${VERSION}"
+echo "    ✅ @androidtui/react@${VERSION}"
+echo "    ✅ @androidtui/solid@${VERSION}"
+echo "    ✅ @androidtui/keymap@${VERSION}"
+echo "    ✅ @androidtui/core-android-arm64@${VERSION}"
 echo ""
 echo "${BOLD}Next: rebuild opencode to use the new packages${NC}"
 echo "  cd ~/opencode-bionic"
-echo "  XINCLI_CORE_VERSION=${VERSION} bash termux/rebuild-opencode.sh"
+echo "  ANDROIDTUI_CORE_VERSION=${VERSION} bash termux/rebuild-opencode.sh"
