@@ -91,7 +91,7 @@ mkdir -p "$TEST_DIR"
 cd "$TEST_DIR"
 
 # Minimal package.json — only 3 deps
-# Clean v2 approach: all @androidtui packages published at 0.4.10, so we use
+# Clean v2 approach: all @androidtui packages published at the same version, so we use
 # npm: aliases directly. No overrides needed — @androidtui/solid
 # directly depends on @androidtui/core in its own dependencies.
 cat > package.json <<EOF
@@ -111,6 +111,24 @@ cat > package.json <<EOF
 }
 EOF
 ok "package.json created (clean v2: all @androidtui packages, no overrides needed)"
+
+# Bun's minimumReleaseAge gate blocks packages published less than N seconds
+# ago. Bun's own default is 0, but a global or inherited bunfig can turn the
+# gate on — and this test's whole point is to run against a version published
+# minutes earlier, so a fresh release would look like a packaging failure
+# rather than a policy block. Pin it off for the test project explicitly.
+# The preload registers @opentui/solid's JSX transform. Solid compiles JSX
+# into reactive operations rather than calling a runtime factory the way
+# React does, so the @jsxImportSource pragma in app.tsx is not sufficient on
+# its own — without the transform, bun resolves .tsx against React's runtime
+# and dies with "Cannot find module 'react/jsx-dev-runtime'".
+cat > bunfig.toml <<'EOF'
+preload = ["@opentui/solid/preload"]
+
+[install]
+minimumReleaseAge = 0
+EOF
+ok "bunfig.toml created (solid preload + minimumReleaseAge = 0 for fresh packages)"
 
 # --- bun install -------------------------------------------------------------
 echo ""
@@ -194,6 +212,7 @@ echo ""
 echo "=== Creating test app ==="
 
 cat > app.tsx <<'APPEOF'
+/** @jsxImportSource @opentui/solid */
 import { createCliRenderer } from "@opentui/core"
 import { render } from "@opentui/solid"
 import { createSignal, onCleanup } from "solid-js"
@@ -239,8 +258,8 @@ if "$BUN_BIN" run app.tsx 2>&1; then
   ok "TEST PASSED — opentui + solid work on Termux"
   echo ""
   echo "This means:"
-  echo "  ✅ @androidtui/core@0.4.10 FFI works (libopentui.so loads, no MTE crash)"
-  echo "  ✅ @androidtui/solid@0.4.10 is API-compatible with @androidtui/core@0.4.10"
+  echo "  ✅ @androidtui/core@${ANDROIDTUI_CORE_VERSION} FFI works (libopentui.so loads, no MTE crash)"
+  echo "  ✅ @androidtui/solid@${ANDROIDTUI_SOLID_VERSION} is API-compatible with @androidtui/core@${ANDROIDTUI_CORE_VERSION}"
   echo "  ✅ createCliRenderer() + render() + <box>/<text> all work"
   echo "  ✅ Renderer destroys cleanly (no exit race)"
   echo ""
@@ -263,7 +282,7 @@ else
   echo "    → rebuild .so from same opentui version as the JS bindings"
   echo ""
   echo "  'Cannot find export X in @androidtui/core'"
-  echo "    → @androidtui/solid@0.4.10 API break with @androidtui/core@0.4.10"
+  echo "    → @androidtui/solid@${ANDROIDTUI_SOLID_VERSION} API break with @androidtui/core@${ANDROIDTUI_CORE_VERSION}"
   echo "    → need to fork @opentui/solid, publish as @androidtui/solid"
   echo ""
   echo "  'TypeError: ... is not a function'"
