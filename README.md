@@ -11,8 +11,8 @@
 [![Downloads](https://img.shields.io/github/downloads/bd-loser/opencode-bionic/total.svg)](https://github.com/bd-loser/opencode-bionic/releases)
 [![Bun](https://img.shields.io/badge/Bun-1.3.14%20(bd--loser%20fork)-blue.svg)](https://github.com/bd-loser/bun-termux)
 <!-- versions:badges -->
-[![opentui-js](https://img.shields.io/badge/opentui--js-@xincli%400.5.1-bun.3-green.svg)](https://www.npmjs.com/package/@xincli/opentui-core)
-[![opentui-so](https://img.shields.io/badge/libopentui.so-@xincli%400.5.1-bun.3-green.svg)](https://www.npmjs.com/package/@xincli/opentui-core-android-arm64)
+[![opentui-js](https://img.shields.io/badge/opentui--js-@xincli%400.5.1-green.svg)](https://www.npmjs.com/package/@xincli/opentui-core)
+[![opentui-so](https://img.shields.io/badge/libopentui.so-@xincli%400.5.1-green.svg)](https://www.npmjs.com/package/@xincli/opentui-core-android-arm64)
 <!-- /versions:badges -->
 
 **Keywords:** opencode android · opencode termux · opencode aarch64 ·
@@ -143,8 +143,8 @@ picks up the bump on its next run.
 | Component | Version |
 |---|---|
 | opencode (upstream) | `1.18.15` |
-| `@opentui/{core,keymap,solid}` (JS, via `@xincli`) | `0.5.1-bun.3` |
-| `@xincli/opentui-core-android-arm64` (native `.so`) | `0.5.1-bun.3` |
+| `@opentui/{core,keymap,solid}` (JS, via `@xincli`) | `0.5.1` |
+| `@xincli/opentui-core-android-arm64` (native `.so`) | `0.5.1` |
 | `bun-termux` runtime | tracked at [bd-loser/bun-termux](https://github.com/bd-loser/bun-termux) |
 <!-- /versions:table -->
 
